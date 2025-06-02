@@ -1,5 +1,5 @@
 {
-  "name": "solid-starter",
+  "name": "IME",
   "type": "module",
   "pnpm": {
     "neverBuiltDependencies": []
@@ -12,14 +12,7 @@
     "build": "vinxi build",
     "start": "vinxi start",
     "format": "eslint --fix .",
-    "lint": "drizzle-kit check && eslint . && tsc --noEmit",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "db:pull": "drizzle-kit pull",
-    "db:export": "drizzle-kit export",
-    "db:up": "drizzle-kit up",
-    "db:studio": "drizzle-kit studio --verbose"
+    "lint": "eslint . && tsc --noEmit"
   },
   "dependencies": {
     "@corvu/calendar": "^0.1.2",
@@ -31,18 +24,11 @@
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.3",
     "@solidjs/start": "^1.1.4",
-    "@trpc/client": "^11.1.4",
-    "@trpc/server": "^11.1.4",
-    "better-auth": "^1.2.8",
-    "better-sqlite3": "^11.10.0",
     "chart.js": "^4.4.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk-solid": "^1.1.2",
-    "drizzle-orm": "^0.43.1",
     "embla-carousel-solid": "^8.6.0",
-    "lucide-solid": "^0.511.0",
-    "posthog-js": "^1.249.0",
     "solid-js": "^1.9.7",
     "solid-sonner": "^0.2.8",
     "tailwind-merge": "^3.3.0",
@@ -50,9 +36,8 @@
     "zod": "^3.25.42"
   },
   "devDependencies": {
+    "@iconify/json": "^2.2.344",
     "@tailwindcss/vite": "^4.1.8",
-    "@types/better-sqlite3": "^7.6.13",
-    "drizzle-kit": "^0.31.1",
     "eslint": "^9.28.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-prettier": "^5.4.1",
@@ -61,6 +46,7 @@
     "tailwindcss": "^4.1.8",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.33.0",
+    "unplugin-icons": "^22.1.0",
     "vinxi": "^0.5.6",
     "vite-plugin-eslint": "^1.8.1"
   }
