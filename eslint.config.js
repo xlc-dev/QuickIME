@@ -8,6 +8,9 @@ export default tseslint.config(
   tseslint.configs.stylistic,
   jsxA11y.flatConfigs.strict,
   {
+    ignores: [".output/", ".vinxi/", "node_modules/", "**/*.min.js"],
+  },
+  {
     files: ["**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
       parserOptions: {
