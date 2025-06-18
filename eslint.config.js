@@ -23,7 +23,7 @@ export default tseslint.config(
     },
     rules: {
       "prettier/prettier": [
-        "error",
+        "warn",
         {
           useTabs: false,
           tabWidth: 2,
