@@ -5,10 +5,10 @@ import eslint from "vite-plugin-eslint";
 import Icons from "unplugin-icons/vite";
 
 export default defineConfig({
-  ssr: false,
+  ssr: true,
   server: {
-    baseURL: process.env.BASE_URL,
-    preset: "github_pages",
+    baseURL: process.env.BASE_PATH,
+    preset: "static",
   },
   vite: {
     plugins: [

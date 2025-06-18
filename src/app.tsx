@@ -1,6 +1,10 @@
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { ColorModeProvider, ColorModeScript, createLocalStorageManager } from "@kobalte/core";
+import {
+  ColorModeProvider,
+  ColorModeScript,
+  createLocalStorageManager,
+} from "@kobalte/core";
 import { Suspense, Show } from "solid-js";
 
 import "./app.css";
@@ -16,8 +20,12 @@ export default function App() {
 
   return (
     <Router
+      base={import.meta.env.SERVER_BASE_URL}
       root={(props) => (
-        <Show when={ENABLE_COLOR_MODE} fallback={<Suspense>{props.children}</Suspense>}>
+        <Show
+          when={ENABLE_COLOR_MODE}
+          fallback={<Suspense>{props.children}</Suspense>}
+        >
           <>
             <ColorModeScript storageType={storageManager.type} />
             <ColorModeProvider storageManager={storageManager}>
@@ -25,7 +33,8 @@ export default function App() {
             </ColorModeProvider>
           </>
         </Show>
-      )}>
+      )}
+    >
       <FileRoutes />
     </Router>
   );

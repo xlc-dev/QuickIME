@@ -39,21 +39,18 @@ jobs:
       - name: Build
         run: pnpm run build
         env:
-          BASE_URL: /IME/
+          BASE_PATH: /IME/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ".output/public"
+          path: "./.output/public"
 
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: create .nojekyll
+        run: touch .output/public/.nojekyll
+
+      - name: deploy pages
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        with:
+          branch: gh-pages
+          folder: .output/public
