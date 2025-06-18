@@ -11,7 +11,7 @@ export default defineConfig({
       Icons({ compiler: "solid" }),
       tailwindcss(),
       eslint({
-        fix: true,
+        fix: false,
         cache: true,
       }),
     ],
