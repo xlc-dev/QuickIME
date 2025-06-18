@@ -6,6 +6,9 @@ import Icons from "unplugin-icons/vite";
 
 export default defineConfig({
   ssr: false,
+  server: {
+    baseURL: process.env.BASE_URL,
+  },
   vite: {
     plugins: [
       Icons({ compiler: "solid" }),
