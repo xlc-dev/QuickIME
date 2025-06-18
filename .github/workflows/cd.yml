@@ -7,7 +7,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -17,40 +17,41 @@ concurrency:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v2
         with:
-          version: 10
+          version: latest
 
-      - name: Setup Node.js & cache pnpm
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "pnpm"
 
-      - name: Install dependencies
+      - name: install
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm run build
+      - name: build
+        run: pnpm build
         env:
-          BASE_PATH: /IME/
+          BASE_PATH: "/IME/"
 
-      - name: Upload artifact
+      - name: upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./.output/public"
+          path: ".output/public"
 
-      - name: create .nojekyll
-        run: touch .output/public/.nojekyll
-
-      - name: deploy pages
-        uses: JamesIves/github-pages-deploy-action@v4.5.0
-        with:
-          branch: gh-pages
-          folder: .output/public
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
