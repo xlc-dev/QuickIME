@@ -5,10 +5,14 @@ import eslint from "vite-plugin-eslint";
 import Icons from "unplugin-icons/vite";
 
 export default defineConfig({
-  appRoot: process.env.BASE_PATH,
   server: {
     baseURL: process.env.BASE_PATH,
     static: true,
+    publicAssets: [
+      {
+        dir: "/QuickIME/public",
+      },
+    ],
     prerender: {
       failOnError: true,
       routes: ["/"],

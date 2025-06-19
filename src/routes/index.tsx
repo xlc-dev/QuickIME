@@ -26,7 +26,7 @@ export default function Home() {
 
   return (
     <MetaProvider>
-      <Title>IME – An Input Method Editor that doesn't suck</Title>
+      <Title>QuickIME – An Input Method Editor that doesn't suck</Title>
       <Flex
         flexDirection="col"
         justifyContent="start"
@@ -37,7 +37,8 @@ export default function Home() {
             <div class="text-center">
               <Show when={showTitle()}>
                 <h1 class="text-3xl font-semibold sm:text-4xl">
-                  IME – An Input Method Editor that <span class="text-primary">doesn't suck</span>
+                  QuickIME – An Input Method Editor that{" "}
+                  <span class="text-primary">doesn't suck</span>
                 </h1>
               </Show>
 
