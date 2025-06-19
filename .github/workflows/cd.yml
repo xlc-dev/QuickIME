@@ -37,7 +37,7 @@ jobs:
       - name: build
         run: pnpm build
         env:
-          BASE_PATH: "/IME/"
+          BASE_PATH: "/QuickIME/"
 
       - name: upload artifact
         uses: actions/upload-pages-artifact@v3
