@@ -20,7 +20,7 @@ export function IMEField() {
     <TextField class="w-full">
       <TextFieldTextArea
         autoResize
-        placeholder="Type your Japanese message here"
+        placeholder="Type your message here"
         ref={textArea}
         onInput={(e) => setInput(e.currentTarget.value)}
       />
