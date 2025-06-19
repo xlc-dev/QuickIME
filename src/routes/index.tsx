@@ -29,6 +29,7 @@ export default function Home() {
       <MetaProvider>
         <Title>QuickIME – An Input Method Editor that doesn't suck</Title>
       </MetaProvider>
+
       <Flex
         flexDirection="col"
         justifyContent="start"
