@@ -1,7 +1,7 @@
 import { MetaProvider, Title } from "@solidjs/meta";
 import { Show } from "solid-js";
 
-import { createStorageSignal } from "~/storage";
+import { createStorageSignal } from "~/utils";
 
 import { ThemeToggle } from "~/components/ui/ThemeToggle";
 import { Flex } from "~/components/ui/Flex";
