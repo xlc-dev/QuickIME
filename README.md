@@ -2,16 +2,12 @@
 
 **A fast, private, and simple web-based Input Method Editor that doesn’t suck.**
 
----
-
 ## 🚀 Features
 
 - Zero-server IME: Runs 100% in your browser. No tracking, no back-end, no network calls.
 - Instant Romanization -> Characters: Type phonetic input (e.g. romaji) and get immediate candidate suggestions.
 - Persistent UI Settings saved in localStorage
 - Light / Dark / System Theme
-
----
 
 ## 💻 Getting Started
 
@@ -46,20 +42,16 @@ pnpm build
 pnpm preview
 ```
 
----
-
 ## 🤝 Contributing
 
 1. Fork it
 2. Create your feature branch (`git checkout -b feat/...`)
-3. Commit your changes (`git commit -m "feat: ..."`)
-4. Push to the branch (`git push origin feat/...`)
+3. Commit your changes
+4. Push to the branch
 5. Open a Pull Request
 
 All contributions are welcome!
 
----
-
 ## 📜 License
 
-GPL-3.0 © 2025 [xlc-dev](https://github.com/xlc-dev)
+GPL-3.0 © 2025 [xlc-dev](https://github.com/xlc-dev). See [LICENSE](https://github.com/xlc-dev/QuickIME/blob/main/LICENSE) for more information.
