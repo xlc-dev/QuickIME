@@ -8,11 +8,6 @@ export default defineConfig({
   server: {
     baseURL: process.env.BASE_PATH,
     static: true,
-    publicAssets: [
-      {
-        dir: "/QuickIME/public",
-      },
-    ],
     prerender: {
       failOnError: true,
       routes: ["/"],

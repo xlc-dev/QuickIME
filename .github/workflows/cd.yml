@@ -39,6 +39,9 @@ jobs:
         env:
           BASE_PATH: "/QuickIME/"
 
+      - name: Create .nojekyll
+        run: touch .output/public/.nojekyll
+
       - name: upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
