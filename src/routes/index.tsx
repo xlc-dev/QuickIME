@@ -25,8 +25,10 @@ export default function Home() {
   );
 
   return (
-    <MetaProvider>
-      <Title>QuickIME – An Input Method Editor that doesn't suck</Title>
+    <>
+      <MetaProvider>
+        <Title>QuickIME – An Input Method Editor that doesn't suck</Title>
+      </MetaProvider>
       <Flex
         flexDirection="col"
         justifyContent="start"
@@ -116,6 +118,6 @@ export default function Home() {
           </DialogContent>
         </Dialog>
       </Flex>
-    </MetaProvider>
+    </>
   );
 }
