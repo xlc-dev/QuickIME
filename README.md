@@ -6,7 +6,7 @@
 
 ## 🚀 Features
 
-- Zero-server IME: Runs 100% in your browser. No tracking, no back-end. Only network call for Jisho to get kanji suggestions.
+- Zero-server IME: Runs 100% in your browser. No tracking, no back-end. Only network call to proxy for Jisho to get kanji suggestions.
 - Instant Romanization -> Characters: Type phonetic input (e.g. romaji) and get immediate candidate suggestions.
 - Persistent UI Settings saved in localStorage
 - Light / Dark / System Theme
@@ -43,16 +43,6 @@ pnpm build
 # Preview the production build locally
 pnpm preview
 ```
-
-## 🤝 Contributing
-
-1. Fork it
-2. Create your feature branch (`git checkout -b feat/...`)
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
-
-All contributions are welcome!
 
 ## 📜 License
 
