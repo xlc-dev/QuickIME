@@ -219,20 +219,6 @@ export function IMEField() {
       setLastConversion(null);
       return;
     }
-
-    if (e.key === " " && isComposing()) {
-      const start = confirmedIndex();
-      const pos = e.currentTarget.selectionStart;
-      const reading = input().slice(start, pos);
-
-      if (wanakana.isHiragana(reading) && reading.length) {
-        e.preventDefault();
-        setCompositionStart(start);
-        setLookupReading(reading);
-        setSelectedIndex(0);
-        setIsMenuOpen(true);
-      }
-    }
   }
 
   function handleInput(
@@ -241,6 +227,28 @@ export function IMEField() {
     }
   ) {
     const val = e.currentTarget.value;
+    const pos = e.currentTarget.selectionStart;
+
+    if (isComposing() && e.inputType === "insertText" && (e.data === " " || e.data === null)) {
+      const start = confirmedIndex();
+      const reading = val.slice(start, pos - 1);
+
+      if (wanakana.isHiragana(reading) && reading.length) {
+        const newVal = val.slice(0, pos - 1) + val.slice(pos);
+        setInput(newVal);
+        if (ta) {
+          ta.value = newVal;
+          ta.setSelectionRange(newVal.length, newVal.length);
+        }
+
+        setCompositionStart(start);
+        setLookupReading(reading);
+        setSelectedIndex(0);
+        setIsMenuOpen(true);
+        return;
+      }
+    }
+
     setInput(val);
     setIsComposing(val.length > confirmedIndex());
     setLastConversion(null);
@@ -304,7 +312,8 @@ export function IMEField() {
           onCloseAutoFocus={(e) => {
             e.preventDefault();
             ta?.focus();
-          }}>
+          }}
+          class="w-[var(--kb-popper-content-width)]">
           <Suspense fallback={<Spinner />}>
             <Show
               when={suggestions()?.length > 0}
@@ -312,7 +321,7 @@ export function IMEField() {
                 <div class="text-muted-foreground px-2 py-1.5 text-sm">No results found.</div>
               }>
               <>
-                <div ref={listRef} class="max-h-[10rem] overflow-y-auto">
+                <div ref={listRef} class="max-h-[13rem] overflow-y-auto">
                   <For each={suggestions()}>
                     {(s, idx) => (
                       <DropdownMenuItem
