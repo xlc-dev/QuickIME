@@ -1,21 +1,23 @@
 import { MetaProvider, Title } from "@solidjs/meta";
-import { Show } from "solid-js";
-
-import { createStorageSignal } from "~/utils";
+import { clientOnly } from "@solidjs/start";
 
 import { ThemeToggle } from "~/components/ui/ThemeToggle";
 import { Flex } from "~/components/ui/Flex";
-import { IMEField } from "~/components/IMEField";
 import {
   Dialog,
+  DialogTrigger,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogDescription,
 } from "~/components/ui/Dialog";
 import { Label } from "~/components/ui/Label";
 import { Switch, SwitchControl, SwitchThumb, SwitchLabel } from "~/components/ui/Switch";
+
+import { IMEField } from "~/components/IMEField";
+
+const Info = clientOnly(() => import("../components/Info"));
+import { createStorageSignal } from "~/utils";
 
 export default function Home() {
   const [showTitle, setShowTitle] = createStorageSignal("setting-show-title", true);
@@ -34,90 +36,120 @@ export default function Home() {
         flexDirection="col"
         justifyContent="start"
         alignItems="center"
-        class="bg-background text-foreground relative min-h-screen pt-[20vh]">
-        <Dialog>
-          <Flex flexDirection="col" alignItems="center" class="w-full max-w-2xl gap-4 px-4">
-            <div class="text-center">
-              <Show when={showTitle()}>
-                <h1 class="text-3xl font-semibold sm:text-4xl">
-                  QuickIME – An Input Method Editor that{" "}
-                  <span class="text-primary">doesn't suck</span>
-                </h1>
-              </Show>
+        class="bg-background text-foreground min-h-screen pt-8 lg:pt-[20vh]">
+        <div class="flex w-full max-w-2xl flex-col items-center gap-4 px-4">
+          <div class="text-center">
+            <Info showTitle={showTitle} showExplanation={showExplanation} />
+          </div>
 
-              <Show when={showExplanation()}>
-                <p class="text-muted-foreground mx-auto mt-4 max-w-xl text-base sm:text-lg">
-                  Tired of clunky setups, invasive tracking, and unreliable input methods? IME is a
-                  fast, private, and simple web-based alternative that just works.
-                </p>
-              </Show>
-            </div>
+          <IMEField />
 
-            <IMEField />
-
-            <footer class="text-muted-foreground text-sm">
-              <Flex alignItems="center" class="gap-3">
-                <span>
-                  Made by{" "}
-                  <a
-                    href="https://github.com/xlc-dev"
-                    class="text-foreground font-bold hover:underline">
-                    xlcdev
-                  </a>
-                </span>
-                <span>·</span>
+          <footer class="text-muted-foreground w-full text-sm">
+            <Flex justifyContent="center" alignItems="center" class="gap-3">
+              <span>
+                Made by{" "}
                 <a
-                  href="https://github.com/xlc-dev/IME"
+                  href="https://github.com/xlc-dev"
                   class="text-foreground font-bold hover:underline">
-                  GitHub
+                  xlcdev
                 </a>
-                <span>·</span>
+              </span>
+              <span>·</span>
+              <a
+                href="https://github.com/xlc-dev/IME"
+                class="text-foreground font-bold hover:underline">
+                GitHub
+              </a>
+              <span>·</span>
+
+              <Dialog>
                 <DialogTrigger
                   as="button"
                   class="text-foreground cursor-pointer font-bold hover:underline">
                   Settings
                 </DialogTrigger>
-              </Flex>
-            </footer>
-          </Flex>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Settings</DialogTitle>
+                    <DialogDescription>
+                      Customize your experience. Changes are saved automatically.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div class="grid gap-4 py-4">
+                    <Switch
+                      checked={showTitle()}
+                      onChange={setShowTitle}
+                      id="show-title"
+                      class="flex w-full items-center justify-between">
+                      <SwitchLabel>Show Title</SwitchLabel>
+                      <SwitchControl>
+                        <SwitchThumb />
+                      </SwitchControl>
+                    </Switch>
 
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Settings</DialogTitle>
-              <DialogDescription>
-                Customize your experience. Changes are saved automatically.
-              </DialogDescription>
-            </DialogHeader>
-            <div class="grid gap-4 py-4">
-              <Switch
-                checked={showTitle()}
-                onChange={setShowTitle}
-                id="show-title"
-                class="flex w-full items-center justify-between">
-                <SwitchLabel>Show Title</SwitchLabel>
-                <SwitchControl>
-                  <SwitchThumb />
-                </SwitchControl>
-              </Switch>
+                    <Switch
+                      checked={showExplanation()}
+                      onChange={setShowExplanation}
+                      id="show-explanation"
+                      class="flex w-full items-center justify-between">
+                      <SwitchLabel>Show Explanation</SwitchLabel>
+                      <SwitchControl>
+                        <SwitchThumb />
+                      </SwitchControl>
+                    </Switch>
 
-              <Switch
-                checked={showExplanation()}
-                onChange={setShowExplanation}
-                id="show-explanation"
-                class="flex w-full items-center justify-between">
-                <SwitchLabel>Show Explanation</SwitchLabel>
-                <SwitchControl>
-                  <SwitchThumb />
-                </SwitchControl>
-              </Switch>
+                    <Flex justifyContent="between" alignItems="center">
+                      <Label>Theme</Label>
+                      <ThemeToggle />
+                    </Flex>
+                  </div>
+                </DialogContent>
+              </Dialog>
 
-              <Flex justifyContent="between" alignItems="center">
-                <Label>Theme</Label>
-                <ThemeToggle />
-              </Flex>
-            </div>
-          </DialogContent>
-        </Dialog>
+              <span>·</span>
+
+              <Dialog>
+                <DialogTrigger
+                  as="button"
+                  class="text-foreground cursor-pointer font-bold hover:underline">
+                  Tutorial
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Tutorial</DialogTitle>
+                    <DialogDescription>
+                      This is a quick walkthrough of how to use QuickIME.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div class="space-y-4 py-2">
+                    <p>
+                      You can select the input field and start typing, shocker. But once you have
+                      typed something, QuickIME comes with a few shortcuts:
+                    </p>
+                    <ul class="list-disc space-y-4">
+                      <li>
+                        Press space to call jisho.org to get kanji suggestions. in which you can:
+                        <ul class="list-inside list-disc">
+                          <li>Go up or down with arrow keys or scroll.</li>
+                          <li>Press enter or click to select the suggestion.</li>
+                        </ul>
+                      </li>
+                      <li>
+                        Press enter to confirm what you have typed, and don't want a kanji
+                        suggestion for that portion of text.
+                      </li>
+                      <li>Press shift + space to convert the unconfirmed text to katakana.</li>
+                      <li>
+                        Backspaces are smart. It tries to unconfirm anything you did, else it will
+                        remove the last character like normal.
+                      </li>
+                    </ul>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </Flex>
+          </footer>
+        </div>
       </Flex>
     </>
   );
