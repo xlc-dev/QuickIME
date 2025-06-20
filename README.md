@@ -1,10 +1,12 @@
-# QuickIME
-
-**A fast, private, and simple web-based Input Method Editor that doesn’t suck.**
+<div align="center">
+  <img src="src/public/logo.png" alt="" width="150" />
+  <h1>QuickIME</h1>
+  <p><strong>A fast, private, and simple web-based Input Method Editor that doesn’t suck.</strong></p>
+</div>
 
 ## 🚀 Features
 
-- Zero-server IME: Runs 100% in your browser. No tracking, no back-end, no network calls.
+- Zero-server IME: Runs 100% in your browser. No tracking, no back-end. Only network call for Jisho to get kanji suggestions.
 - Instant Romanization -> Characters: Type phonetic input (e.g. romaji) and get immediate candidate suggestions.
 - Persistent UI Settings saved in localStorage
 - Light / Dark / System Theme
