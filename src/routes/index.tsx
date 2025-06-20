@@ -45,7 +45,7 @@ export default function Home() {
           <IMEField />
 
           <footer class="text-muted-foreground w-full text-sm">
-            <Flex justifyContent="center" alignItems="center" class="gap-3">
+            <Flex justifyContent="center" alignItems="center" class="gap-2">
               <span>
                 Made by{" "}
                 <a

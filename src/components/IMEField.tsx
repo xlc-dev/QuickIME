@@ -1,3 +1,4 @@
+// @refresh reload
 import * as wanakana from "wanakana";
 import {
   createSignal,
@@ -74,18 +75,18 @@ export function IMEField() {
   const unconfirmedText = createMemo(() => input().slice(confirmedIndex()));
 
   onMount(() => {
-    if (ta) {
-      wanakana.bind(ta);
-      ta.value = "";
-      setInput("");
-      ta.focus();
-    }
+    if (!ta) return;
+    wanakana.bind(ta);
+    ta.value = "";
+    setInput("");
+    ta.focus();
   });
 
   onCleanup(() => {
     if (ta) wanakana.unbind(ta);
   });
 
+  // reset menu when lookupReading changes
   createEffect(() => {
     suggestions();
     itemRefs = [];
@@ -122,78 +123,55 @@ export function IMEField() {
     setTimeout(() => ta?.focus(), 0);
   }
 
-  function handleKeyDown(
-    e: KeyboardEvent & {
-      currentTarget: HTMLTextAreaElement;
-    }
-  ) {
+  function handleKeyDown(e: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) {
     if (isMenuOpen()) {
       const len = suggestions().length;
-      if (len > 0) {
-        if (e.key === "ArrowDown") {
-          e.preventDefault();
-          const newIndex = (selectedIndex() + 1) % len;
-          setSelectedIndex(newIndex);
-          const item = itemRefs[newIndex];
-          const container = listRef;
-          if (item && container) {
-            const itop = item.offsetTop;
-            const ibot = itop + item.offsetHeight;
-            const ctop = container.scrollTop;
-            const cheight = container.clientHeight;
-            if (ibot > ctop + cheight) {
-              container.scrollTop = ibot - cheight;
-            } else if (itop < ctop) {
-              container.scrollTop = itop;
-            }
+      if (len > 0 && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+        e.preventDefault();
+        const delta = e.key === "ArrowDown" ? 1 : -1;
+        const newIndex = (selectedIndex() + delta + len) % len;
+        setSelectedIndex(newIndex);
+        const item = itemRefs[newIndex];
+        const container = listRef;
+        if (item && container) {
+          const itop = item.offsetTop;
+          const ibot = itop + item.offsetHeight;
+          const ctop = container.scrollTop;
+          const cheight = container.clientHeight;
+          if (ibot > ctop + cheight) {
+            container.scrollTop = ibot - cheight;
+          } else if (itop < ctop) {
+            container.scrollTop = itop;
           }
-          return;
         }
-        if (e.key === "ArrowUp") {
-          e.preventDefault();
-          const newIndex = (selectedIndex() - 1 + len) % len;
-          setSelectedIndex(newIndex);
-          const item = itemRefs[newIndex];
-          const container = listRef;
-          if (item && container) {
-            const itop = item.offsetTop;
-            const ibot = itop + item.offsetHeight;
-            const ctop = container.scrollTop;
-            const cheight = container.clientHeight;
-            if (itop < ctop) {
-              container.scrollTop = itop;
-            } else if (ibot > ctop + cheight) {
-              container.scrollTop = ibot - cheight;
-            }
-          }
-          return;
-        }
+        return;
       }
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         commitSuggestion(selectedIndex());
-        return;
       }
+      return;
     }
 
+    // backspace to undo last conversion
+    const lc = lastConversion();
     if (
       e.key === "Backspace" &&
-      lastConversion() &&
-      e.currentTarget.selectionStart === lastConversion()!.end &&
-      e.currentTarget.selectionEnd === lastConversion()!.end
+      lc &&
+      e.currentTarget.selectionStart === lc.end &&
+      e.currentTarget.selectionEnd === lc.end
     ) {
       e.preventDefault();
-      const conv = lastConversion()!;
-      const before = input().slice(0, conv.start);
-      const after = input().slice(conv.end);
-      const newVal = before + conv.reading + after;
+      const before = input().slice(0, lc.start);
+      const after = input().slice(lc.end);
+      const newVal = before + lc.reading + after;
       setInput(newVal);
-      const newPos = conv.start + conv.reading.length;
+      const newPos = lc.start + lc.reading.length;
       if (ta) {
         ta.value = newVal;
         ta.setSelectionRange(newPos, newPos);
       }
-      setConfirmedIndex(conv.start);
+      setConfirmedIndex(lc.start);
       setIsComposing(true);
       setLastConversion(null);
       return;
@@ -213,18 +191,18 @@ export function IMEField() {
       const pos = e.currentTarget.selectionStart;
       const reading = input().slice(start, pos);
       if (wanakana.isHiragana(reading)) {
-        const katakana = wanakana.toKatakana(reading);
+        const kata = wanakana.toKatakana(reading);
         const before = input().slice(0, start);
         const after = input().slice(pos);
-        const newVal = before + katakana + after;
+        const newVal = before + kata + after;
         setInput(newVal);
-        const end = before.length + katakana.length;
+        const end = before.length + kata.length;
         if (ta) {
           ta.value = newVal;
           ta.setSelectionRange(end, end);
         }
         setLastConversion({
-          confirmed: katakana,
+          confirmed: kata,
           reading,
           start,
           end,
@@ -234,33 +212,41 @@ export function IMEField() {
       }
       return;
     }
-
-    if (e.key === " ") {
-      const pos = e.currentTarget.selectionStart;
-      const reading = input().slice(confirmedIndex(), pos);
-      if (wanakana.isHiragana(reading) && reading.length) {
-        e.preventDefault();
-        setCompositionStart(confirmedIndex());
-        setLookupReading(reading);
-        setSelectedIndex(0);
-        setIsMenuOpen(true);
-        return;
-      }
-    }
   }
 
-  function handleInput(
-    e: InputEvent & {
-      currentTarget: HTMLTextAreaElement;
-    }
-  ) {
+  function handleInput(e: InputEvent & { currentTarget: HTMLTextAreaElement }) {
     const val = e.currentTarget.value;
     setInput(val);
     setIsComposing(val.length > confirmedIndex());
     setLastConversion(null);
-    if (isMenuOpen()) {
-      setIsMenuOpen(false);
-      setLookupReading(null);
+
+    if (e.inputType === "insertText" && e.data === " " && isComposing()) {
+      const start = confirmedIndex();
+      const pos = e.currentTarget.selectionStart;
+      const reading = val.slice(start, pos - 1);
+      if (wanakana.isHiragana(reading) && reading.length) {
+        setCompositionStart(start);
+        setLookupReading(reading);
+        setSelectedIndex(0);
+        setIsMenuOpen(true);
+      }
+    }
+  }
+
+  function handleCompositionStart(e: CompositionEvent & { currentTarget: HTMLTextAreaElement }) {
+    setIsComposing(true);
+    setCompositionStart(e.currentTarget.selectionStart);
+  }
+
+  function handleCompositionEnd(e: CompositionEvent & { currentTarget: HTMLTextAreaElement }) {
+    setIsComposing(false);
+    const start = compositionStart();
+    const pos = e.currentTarget.selectionStart;
+    const reading = input().slice(start, pos);
+    if (wanakana.isHiragana(reading) && reading.length) {
+      setLookupReading(reading);
+      setSelectedIndex(0);
+      setIsMenuOpen(true);
     }
   }
 
@@ -283,6 +269,8 @@ export function IMEField() {
                 value={input()}
                 onInput={handleInput}
                 onKeyDown={handleKeyDown}
+                onCompositionStart={handleCompositionStart}
+                onCompositionEnd={handleCompositionEnd}
                 class="caret-foreground bg-transparent text-transparent"
               />
             </div>
@@ -305,7 +293,7 @@ export function IMEField() {
                   <For each={suggestions()}>
                     {(s, idx) => (
                       <DropdownMenuItem
-                        ref={(el) => (itemRefs[idx()] = el)}
+                        ref={(el) => (itemRefs[idx()] = el!)}
                         onSelect={() => commitSuggestion(idx())}
                         onFocus={() => setSelectedIndex(idx())}
                         data-highlighted={selectedIndex() === idx()}
@@ -316,9 +304,7 @@ export function IMEField() {
                   </For>
                 </div>
                 <div class="text-muted-foreground flex items-center justify-end border-t px-2 py-1.5 text-xs">
-                  <span>
-                    {selectedIndex() + 1} / {suggestions().length}
-                  </span>
+                  {selectedIndex() + 1} / {suggestions().length}
                 </div>
               </>
             </Show>
