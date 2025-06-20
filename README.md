@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/logo.png" alt="" width="150" />
+  <img src="public/icon.png" alt="" width="150" />
   <h1>QuickIME</h1>
   <p><strong>A fast, private, and simple web-based Input Method Editor that doesn’t suck.</strong></p>
 </div>
