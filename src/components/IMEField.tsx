@@ -50,6 +50,9 @@ async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
 
   const proxyUrl = JISHO_PROXY_BASE + jishoTargetUrl;
 
+  const hiragana = wanakana.toHiragana(reading);
+  const katakana = wanakana.toKatakana(reading);
+
   try {
     const res = await fetch(proxyUrl);
 
@@ -63,21 +66,22 @@ async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
       } catch (e) {
         console.error("Could not read error response text:", e);
       }
-      return [];
+      return [hiragana, katakana];
     }
 
     const json = (await res.json()) as JishoResponse;
 
     if (!json?.data) {
-      return [];
+      return [hiragana, katakana];
     }
 
     const uniqueWords = new Set(json.data.map((e) => e.japanese[0].word || e.japanese[0].reading));
 
-    return Array.from(uniqueWords);
+    const results = [hiragana, katakana, ...Array.from(uniqueWords)];
+    return [...new Set(results)];
   } catch (error) {
     console.error("Error in fetchKanjiFromJisho:", error);
-    return [];
+    return [hiragana, katakana];
   }
 }
 
@@ -101,8 +105,8 @@ export function IMEField() {
   const [lastConversion, setLastConversion] = createSignal<LastConversion | null>(null);
 
   let ta: HTMLTextAreaElement | undefined;
-  let itemRefs: HTMLDivElement[] = [];
   let listRef: HTMLDivElement | undefined;
+  let itemRefs: HTMLDivElement[] = [];
 
   const confirmedText = createMemo(() => input().slice(0, confirmedIndex()));
   const unconfirmedText = createMemo(() => input().slice(confirmedIndex()));
@@ -123,6 +127,27 @@ export function IMEField() {
     suggestions();
     itemRefs = [];
     setSelectedIndex(0);
+  });
+
+  createEffect(() => {
+    const index = selectedIndex();
+    if (!isMenuOpen() || !listRef || itemRefs.length === 0) return;
+
+    const item = itemRefs[index];
+    const container = listRef;
+
+    if (item && container) {
+      const itemTop = item.offsetTop;
+      const itemBottom = itemTop + item.offsetHeight;
+      const containerTop = container.scrollTop;
+      const containerHeight = container.clientHeight;
+
+      if (itemBottom > containerTop + containerHeight) {
+        container.scrollTop = itemBottom - containerHeight;
+      } else if (itemTop < containerTop) {
+        container.scrollTop = itemTop;
+      }
+    }
   });
 
   function commitSuggestion(idx: number) {
@@ -161,31 +186,6 @@ export function IMEField() {
     }
   ) {
     if (isMenuOpen()) {
-      const len = suggestions().length;
-      if (len > 0 && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
-        e.preventDefault();
-        const delta = e.key === "ArrowDown" ? 1 : -1;
-        const newIndex = (selectedIndex() + delta + len) % len;
-        setSelectedIndex(newIndex);
-        const item = itemRefs[newIndex];
-        const container = listRef;
-        if (item && container) {
-          const itop = item.offsetTop;
-          const ibot = itop + item.offsetHeight;
-          const ctop = container.scrollTop;
-          const cheight = container.clientHeight;
-          if (ibot > ctop + cheight) {
-            container.scrollTop = ibot - cheight;
-          } else if (itop < ctop) {
-            container.scrollTop = itop;
-          }
-        }
-        return;
-      }
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        commitSuggestion(selectedIndex());
-      }
       return;
     }
 
@@ -220,32 +220,18 @@ export function IMEField() {
       return;
     }
 
-    if (e.key === " " && e.shiftKey && isComposing()) {
-      e.preventDefault();
+    if (e.key === " " && isComposing()) {
       const start = confirmedIndex();
       const pos = e.currentTarget.selectionStart;
       const reading = input().slice(start, pos);
-      if (wanakana.isHiragana(reading)) {
-        const kata = wanakana.toKatakana(reading);
-        const before = input().slice(0, start);
-        const after = input().slice(pos);
-        const newVal = before + kata + after;
-        setInput(newVal);
-        const end = before.length + kata.length;
-        if (ta) {
-          ta.value = newVal;
-          ta.setSelectionRange(end, end);
-        }
-        setLastConversion({
-          confirmed: kata,
-          reading,
-          start,
-          end,
-        });
-        setConfirmedIndex(end);
-        setIsComposing(false);
+
+      if (wanakana.isHiragana(reading) && reading.length) {
+        e.preventDefault();
+        setCompositionStart(start);
+        setLookupReading(reading);
+        setSelectedIndex(0);
+        setIsMenuOpen(true);
       }
-      return;
     }
   }
 
@@ -258,18 +244,6 @@ export function IMEField() {
     setInput(val);
     setIsComposing(val.length > confirmedIndex());
     setLastConversion(null);
-
-    if (e.inputType === "insertText" && e.data === " " && isComposing()) {
-      const start = confirmedIndex();
-      const pos = e.currentTarget.selectionStart;
-      const reading = val.slice(start, pos - 1);
-      if (wanakana.isHiragana(reading) && reading.length) {
-        setCompositionStart(start);
-        setLookupReading(reading);
-        setSelectedIndex(0);
-        setIsMenuOpen(true);
-      }
-    }
   }
 
   function handleCompositionStart(
@@ -319,6 +293,9 @@ export function IMEField() {
                 onCompositionStart={handleCompositionStart}
                 onCompositionEnd={handleCompositionEnd}
                 class="caret-foreground bg-transparent text-transparent"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck={false}
               />
             </div>
           </TextField>
@@ -327,8 +304,7 @@ export function IMEField() {
           onCloseAutoFocus={(e) => {
             e.preventDefault();
             ta?.focus();
-          }}
-          class="w-[var(--kb-popper-content-width)]">
+          }}>
           <Suspense fallback={<Spinner />}>
             <Show
               when={suggestions()?.length > 0}
@@ -336,11 +312,11 @@ export function IMEField() {
                 <div class="text-muted-foreground px-2 py-1.5 text-sm">No results found.</div>
               }>
               <>
-                <div ref={listRef} class="max-h-[13rem] overflow-y-auto">
+                <div ref={listRef} class="max-h-[10rem] overflow-y-auto">
                   <For each={suggestions()}>
                     {(s, idx) => (
                       <DropdownMenuItem
-                        ref={(el) => (itemRefs[idx()] = el!)}
+                        ref={(el) => (itemRefs[idx()] = el)}
                         onSelect={() => commitSuggestion(idx())}
                         onFocus={() => setSelectedIndex(idx())}
                         data-highlighted={selectedIndex() === idx()}
