@@ -33,7 +33,7 @@ type LastConversion = {
 };
 
 const JISHO_PROXY_BASE = import.meta.env.PROD
-  ? "https://corsproxy.io/?"
+  ? "https://cors-anywhere.com/"
   : "https://thingproxy.freeboard.io/fetch/";
 
 async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
