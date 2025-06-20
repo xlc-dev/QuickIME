@@ -36,7 +36,7 @@ export default function Home() {
         flexDirection="col"
         justifyContent="start"
         alignItems="center"
-        class="bg-background text-foreground min-h-screen pt-8 lg:pt-[20vh]">
+        class="bg-background text-foreground pt-4 lg:pt-[20vh]">
         <div class="flex w-full max-w-2xl flex-col items-center gap-4 px-4">
           <div class="text-center">
             <Info showTitle={showTitle} showExplanation={showExplanation} />
