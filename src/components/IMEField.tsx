@@ -32,10 +32,15 @@ type LastConversion = {
   end: number;
 };
 
+const JISHO_PROXY_BASE = import.meta.env.PROD
+  ? "https://corsproxy.io/?"
+  : "https://thingproxy.freeboard.io/fetch/";
+
 async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
   if (!reading) return [];
   const jishoUrl = "https://jisho.org/api/v1/search/words?keyword=" + encodeURIComponent(reading);
-  const proxyUrl = "https://thingproxy.freeboard.io/fetch/" + encodeURIComponent(jishoUrl);
+  const proxyUrl = JISHO_PROXY_BASE + encodeURIComponent(jishoUrl);
+
   try {
     const res = await fetch(proxyUrl);
     if (!res.ok) return [];
