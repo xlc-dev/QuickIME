@@ -38,21 +38,35 @@ const JISHO_PROXY_BASE = import.meta.env.PROD
 
 async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
   if (!reading) return [];
-  const jishoUrl = "https://jisho.org/api/v1/search/words?keyword=" + encodeURIComponent(reading);
 
-  const proxyUrl = import.meta.env.PROD
-    ? JISHO_PROXY_BASE + jishoUrl
-    : JISHO_PROXY_BASE + "?url=" + encodeURIComponent(jishoUrl);
+  const jishoBaseUrl = "jisho.org/api/v1/search/words?keyword=";
+  const jishoFullUrl = jishoBaseUrl + encodeURIComponent(reading);
+
+  let proxyUrl: string;
+
+  if (import.meta.env.PROD) {
+    proxyUrl = JISHO_PROXY_BASE + jishoFullUrl;
+  } else {
+    const fullJishoTarget =
+      "https://jisho.org/api/v1/search/words?keyword=" + encodeURIComponent(reading);
+    proxyUrl = JISHO_PROXY_BASE + "?url=" + encodeURIComponent(fullJishoTarget);
+  }
 
   try {
-    const res = await fetch(proxyUrl, {
-      headers: {
+    const fetchOptions: RequestInit = {};
+
+    if (!import.meta.env.PROD) {
+      fetchOptions.headers = {
         "X-Requested-With": "XMLHttpRequest",
-      },
-    });
+      };
+    }
+
+    const res = await fetch(proxyUrl, fetchOptions);
 
     if (!res.ok) {
-      console.error(`Error fetching from proxy: ${res.status} ${res.statusText}`);
+      console.error(
+        `Error fetching from proxy (${import.meta.env.PROD ? "CORS Anywhere" : "Thingproxy"}): ${res.status} ${res.statusText}`
+      );
       try {
         const errorText = await res.text();
         console.error("Proxy error response:", errorText);
