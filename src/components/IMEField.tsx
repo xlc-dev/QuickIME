@@ -10,15 +10,21 @@ import {
   Suspense,
   Show,
 } from "solid-js";
+
 import SvgSpinners180Ring from "~icons/svg-spinners/180-ring";
+import CopyIcon from "~icons/material-symbols/content-copy";
+import CheckIcon from "~icons/material-symbols/check";
 
 import { TextField, TextFieldTextArea } from "./ui/TextField";
+import { Button } from "./ui/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/DropdownMenu";
+
+import { createStorageSignal } from "~/utils";
 
 type JishoJapanese = {
   word?: string;
@@ -38,49 +44,42 @@ type LastConversion = {
   end: number;
 };
 
-const JISHO_PROXY_BASE = "https://cors-anywhere.com/";
+const [jishoCache, setJishoCache] = createStorageSignal<Record<string, string[]>>(
+  "jisho-cache",
+  {}
+);
 
 async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
-  if (!reading) {
-    return [];
+  if (!reading) return [];
+
+  const cache = jishoCache();
+  if (cache[reading]) {
+    return cache[reading];
   }
 
-  const jishoTargetUrl =
-    "https://jisho.org/api/v1/search/words?keyword=" + encodeURIComponent(reading);
+  const JISHO_PROXY_BASE = "https://cors-anywhere.com/";
+  const jishoUrl = "https://jisho.org/api/v1/search/words?keyword=" + encodeURIComponent(reading);
 
-  const proxyUrl = JISHO_PROXY_BASE + jishoTargetUrl;
-
+  const proxyUrl = JISHO_PROXY_BASE + jishoUrl;
   const hiragana = wanakana.toHiragana(reading);
   const katakana = wanakana.toKatakana(reading);
 
   try {
     const res = await fetch(proxyUrl);
-
     if (!res.ok) {
-      console.error(
-        `Error fetching from CORS Anywhere proxy: ${res.status} ` + `${res.statusText}`
-      );
-      try {
-        const errorText = await res.text();
-        console.error("Proxy error response:", errorText);
-      } catch (e) {
-        console.error("Could not read error response text:", e);
-      }
+      console.error(`Error fetching from CORS proxy: ${res.status} ${res.statusText}`);
       return [hiragana, katakana];
     }
-
     const json = (await res.json()) as JishoResponse;
+    if (!json?.data) return [hiragana, katakana];
 
-    if (!json?.data) {
-      return [hiragana, katakana];
-    }
+    const unique = new Set(json.data.map((e) => e.japanese[0].word || e.japanese[0].reading));
+    const results = [...new Set([hiragana, katakana, ...Array.from(unique)])];
 
-    const uniqueWords = new Set(json.data.map((e) => e.japanese[0].word || e.japanese[0].reading));
-
-    const results = [hiragana, katakana, ...Array.from(uniqueWords)];
-    return [...new Set(results)];
-  } catch (error) {
-    console.error("Error in fetchKanjiFromJisho:", error);
+    setJishoCache((prev) => ({ ...prev, [reading]: results }));
+    return results;
+  } catch (e) {
+    console.error("fetchKanjiFromJisho error", e);
     return [hiragana, katakana];
   }
 }
@@ -92,17 +91,18 @@ const Spinner = () => (
 );
 
 export function IMEField() {
-  const [input, setInput] = createSignal("");
-  const [compositionStart, setCompositionStart] = createSignal(0);
   const [lookupReading, setLookupReading] = createSignal<string | null>(null);
   const [suggestions] = createResource(lookupReading, fetchKanjiFromJisho, {
     initialValue: [],
   });
+  const [input, setInput] = createSignal("");
+  const [compositionStart, setCompositionStart] = createSignal(0);
   const [selectedIndex, setSelectedIndex] = createSignal(0);
   const [isMenuOpen, setIsMenuOpen] = createSignal(false);
   const [confirmedIndex, setConfirmedIndex] = createSignal(0);
   const [isComposing, setIsComposing] = createSignal(false);
-  const [lastConversion, setLastConversion] = createSignal<LastConversion | null>(null);
+  const [conversionHistory, setConversionHistory] = createSignal<LastConversion[]>([]);
+  const [copied, setCopied] = createSignal(false);
 
   let ta: HTMLTextAreaElement | undefined;
   let listRef: HTMLDivElement | undefined;
@@ -130,24 +130,17 @@ export function IMEField() {
   });
 
   createEffect(() => {
-    const index = selectedIndex();
     if (!isMenuOpen() || !listRef || itemRefs.length === 0) return;
-
-    const item = itemRefs[index];
-    const container = listRef;
-
-    if (item && container) {
-      const itemTop = item.offsetTop;
-      const itemBottom = itemTop + item.offsetHeight;
-      const containerTop = container.scrollTop;
-      const containerHeight = container.clientHeight;
-
-      if (itemBottom > containerTop + containerHeight) {
-        container.scrollTop = itemBottom - containerHeight;
-      } else if (itemTop < containerTop) {
-        container.scrollTop = itemTop;
-      }
-    }
+    const idx = selectedIndex();
+    const item = itemRefs[idx];
+    const container = listRef!;
+    if (!item) return;
+    const it = item.offsetTop,
+      ib = it + item.offsetHeight,
+      ct = container.scrollTop,
+      ch = container.clientHeight;
+    if (ib > ct + ch) container.scrollTop = ib - ch;
+    else if (it < ct) container.scrollTop = it;
   });
 
   function commitSuggestion(idx: number) {
@@ -166,12 +159,7 @@ export function IMEField() {
       ta.value = newVal;
       ta.setSelectionRange(newPos, newPos);
     }
-    setLastConversion({
-      confirmed: cand,
-      reading,
-      start,
-      end: newPos,
-    });
+    setConversionHistory((prev) => [...prev, { confirmed: cand, reading, start, end: newPos }]);
     setLookupReading(null);
     setSelectedIndex(0);
     setIsMenuOpen(false);
@@ -180,16 +168,18 @@ export function IMEField() {
     setTimeout(() => ta?.focus(), 0);
   }
 
-  function handleKeyDown(
-    e: KeyboardEvent & {
-      currentTarget: HTMLTextAreaElement;
-    }
-  ) {
+  function handleKeyDown(e: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) {
     if (isMenuOpen()) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        commitSuggestion(selectedIndex());
+      }
       return;
     }
 
-    const lc = lastConversion();
+    const history = conversionHistory();
+    const lc = history.length > 0 ? history[history.length - 1] : null;
+
     if (
       e.key === "Backspace" &&
       lc &&
@@ -208,31 +198,25 @@ export function IMEField() {
       }
       setConfirmedIndex(lc.start);
       setIsComposing(true);
-      setLastConversion(null);
+      setConversionHistory((prev) => prev.slice(0, -1));
       return;
     }
 
     if (e.key === "Enter" && isComposing()) {
       e.preventDefault();
+      const end = e.currentTarget.selectionStart;
+      setConfirmedIndex(end);
       setIsComposing(false);
-      setConfirmedIndex(e.currentTarget.selectionStart);
-      setLastConversion(null);
-      return;
+      setConversionHistory([]);
     }
   }
 
-  function handleInput(
-    e: InputEvent & {
-      currentTarget: HTMLTextAreaElement;
-    }
-  ) {
+  function handleInput(e: InputEvent & { currentTarget: HTMLTextAreaElement }) {
     const val = e.currentTarget.value;
     const pos = e.currentTarget.selectionStart;
-
     if (isComposing() && e.inputType === "insertText" && (e.data === " " || e.data === null)) {
       const start = confirmedIndex();
       const reading = val.slice(start, pos - 1);
-
       if (wanakana.isHiragana(reading) && reading.length) {
         const newVal = val.slice(0, pos - 1) + val.slice(pos);
         setInput(newVal);
@@ -240,7 +224,6 @@ export function IMEField() {
           ta.value = newVal;
           ta.setSelectionRange(newVal.length, newVal.length);
         }
-
         setCompositionStart(start);
         setLookupReading(reading);
         setSelectedIndex(0);
@@ -250,24 +233,28 @@ export function IMEField() {
     }
 
     setInput(val);
-    setIsComposing(val.length > confirmedIndex());
-    setLastConversion(null);
+
+    const lastCommittedCharIndex = confirmedIndex();
+    if (input().length < lastCommittedCharIndex) {
+      setConversionHistory([]);
+    }
+
+    let currentConfirmedIndex = confirmedIndex();
+
+    if (val.length < currentConfirmedIndex) {
+      currentConfirmedIndex = val.length;
+      setConfirmedIndex(currentConfirmedIndex);
+    }
+
+    setIsComposing(val.length > currentConfirmedIndex);
   }
 
-  function handleCompositionStart(
-    e: CompositionEvent & {
-      currentTarget: HTMLTextAreaElement;
-    }
-  ) {
+  function handleCompositionStart(e: CompositionEvent & { currentTarget: HTMLTextAreaElement }) {
     setIsComposing(true);
     setCompositionStart(e.currentTarget.selectionStart);
   }
 
-  function handleCompositionEnd(
-    e: CompositionEvent & {
-      currentTarget: HTMLTextAreaElement;
-    }
-  ) {
+  function handleCompositionEnd(e: CompositionEvent & { currentTarget: HTMLTextAreaElement }) {
     setIsComposing(false);
     const start = compositionStart();
     const pos = e.currentTarget.selectionStart;
@@ -279,12 +266,42 @@ export function IMEField() {
     }
   }
 
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(input());
+      setCopied(true);
+      ta?.focus();
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Clipboard write failed", err);
+    }
+  }
+
   return (
     <div class="relative w-full">
       <DropdownMenu open={isMenuOpen()} onOpenChange={setIsMenuOpen} placement="bottom-start">
         <DropdownMenuTrigger as="div" class="w-full outline-none" disabled>
           <TextField>
             <div class="relative w-full">
+              <Show when={input().length > 0}>
+                <Button
+                  onClick={handleCopy}
+                  size="sm"
+                  variant="outline"
+                  class="absolute top-2 right-2 z-20 flex items-center space-x-1">
+                  <Show
+                    when={copied()}
+                    fallback={
+                      <>
+                        <CopyIcon class="h-4 w-4" />
+                        <span>Copy</span>
+                      </>
+                    }>
+                    <CheckIcon class="h-4 w-4" />
+                    <span>Copied!</span>
+                  </Show>
+                </Button>
+              </Show>
               <div
                 aria-hidden="true"
                 class="pointer-events-none absolute inset-0 px-3 py-2 text-base whitespace-pre-wrap select-none">
@@ -312,33 +329,30 @@ export function IMEField() {
           onCloseAutoFocus={(e) => {
             e.preventDefault();
             ta?.focus();
-          }}
-          class="w-[var(--kb-popper-content-width)]">
+          }}>
           <Suspense fallback={<Spinner />}>
             <Show
               when={suggestions()?.length > 0}
               fallback={
                 <div class="text-muted-foreground px-2 py-1.5 text-sm">No results found.</div>
               }>
-              <>
-                <div ref={listRef} class="max-h-[13rem] overflow-y-auto">
-                  <For each={suggestions()}>
-                    {(s, idx) => (
-                      <DropdownMenuItem
-                        ref={(el) => (itemRefs[idx()] = el)}
-                        onSelect={() => commitSuggestion(idx())}
-                        onFocus={() => setSelectedIndex(idx())}
-                        data-highlighted={selectedIndex() === idx()}
-                        class="data-[highlighted=true]:bg-accent data-[highlighted=true]:text-accent-foreground scroll-m-1">
-                        {s}
-                      </DropdownMenuItem>
-                    )}
-                  </For>
-                </div>
-                <div class="text-muted-foreground flex items-center justify-end border-t px-2 py-1.5 text-xs">
-                  {selectedIndex() + 1} / {suggestions().length}
-                </div>
-              </>
+              <div ref={listRef} class="max-h-[13rem] overflow-y-auto">
+                <For each={suggestions()}>
+                  {(s, idx) => (
+                    <DropdownMenuItem
+                      ref={(el) => (itemRefs[idx()] = el)}
+                      onSelect={() => commitSuggestion(idx())}
+                      onFocus={() => setSelectedIndex(idx())}
+                      data-highlighted={selectedIndex() === idx()}
+                      class="data-[highlighted=true]:bg-accent data-[highlighted=true]:text-accent-foreground scroll-m-1">
+                      {s}
+                    </DropdownMenuItem>
+                  )}
+                </For>
+              </div>
+              <div class="text-muted-foreground flex items-center justify-end border-t px-2 py-1.5 text-xs">
+                {selectedIndex() + 1} / {suggestions().length}
+              </div>
             </Show>
           </Suspense>
         </DropdownMenuContent>
