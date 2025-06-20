@@ -1,4 +1,3 @@
-// @refresh reload
 import * as wanakana from "wanakana";
 import {
   createSignal,
@@ -32,41 +31,23 @@ type LastConversion = {
   end: number;
 };
 
-const JISHO_PROXY_BASE = import.meta.env.PROD
-  ? "https://cors-anywhere.com/"
-  : "https://thingproxy.freeboard.io/fetch/";
+const JISHO_PROXY_BASE = "https://cors-anywhere.com/";
 
 async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
-  if (!reading) return [];
-
-  const jishoBaseUrl = "jisho.org/api/v1/search/words?keyword=";
-  const jishoFullUrl = jishoBaseUrl + encodeURIComponent(reading);
-
-  let proxyUrl: string;
-
-  if (import.meta.env.PROD) {
-    proxyUrl = JISHO_PROXY_BASE + jishoFullUrl;
-  } else {
-    const fullJishoTarget =
-      "https://jisho.org/api/v1/search/words?keyword=" + encodeURIComponent(reading);
-    proxyUrl = JISHO_PROXY_BASE + "?url=" + encodeURIComponent(fullJishoTarget);
+  if (!reading) {
+    return [];
   }
 
+  const jishoTargetUrl =
+    "https://jisho.org/api/v1/search/words?keyword=" + encodeURIComponent(reading);
+
+  const proxyUrl = JISHO_PROXY_BASE + jishoTargetUrl;
+
   try {
-    const fetchOptions: RequestInit = {};
-
-    if (!import.meta.env.PROD) {
-      fetchOptions.headers = {
-        "X-Requested-With": "XMLHttpRequest",
-      };
-    }
-
-    const res = await fetch(proxyUrl, fetchOptions);
+    const res = await fetch(proxyUrl);
 
     if (!res.ok) {
-      console.error(
-        `Error fetching from proxy (${import.meta.env.PROD ? "CORS Anywhere" : "Thingproxy"}): ${res.status} ${res.statusText}`
-      );
+      console.error(`Error fetching from CORS Anywhere proxy: ${res.status} ${res.statusText}`);
       try {
         const errorText = await res.text();
         console.error("Proxy error response:", errorText);
@@ -75,10 +56,16 @@ async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
       }
       return [];
     }
+
     const json = (await res.json()) as JishoResponse;
-    if (!json?.data) return [];
-    const set = new Set(json.data.map((e) => e.japanese[0].word || e.japanese[0].reading));
-    return Array.from(set);
+
+    if (!json?.data) {
+      return [];
+    }
+
+    const uniqueWords = new Set(json.data.map((e) => e.japanese[0].word || e.japanese[0].reading));
+
+    return Array.from(uniqueWords);
   } catch (error) {
     console.error("Error in fetchKanjiFromJisho:", error);
     return [];
@@ -123,7 +110,6 @@ export function IMEField() {
     if (ta) wanakana.unbind(ta);
   });
 
-  // reset menu when lookupReading changes
   createEffect(() => {
     suggestions();
     itemRefs = [];
@@ -190,7 +176,6 @@ export function IMEField() {
       return;
     }
 
-    // backspace to undo last conversion
     const lc = lastConversion();
     if (
       e.key === "Backspace" &&
