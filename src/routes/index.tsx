@@ -129,20 +129,20 @@ export default function Home() {
                     </p>
                     <ul class="list-disc space-y-4">
                       <li>
-                        Press space to call jisho.org to get kanji suggestions. in which you can:
+                        Press space to call jisho.org to get kanji/kana suggestions. in which you
+                        can:
                         <ul class="list-inside list-disc">
-                          <li>Go up or down with arrow keys or scroll.</li>
-                          <li>Press enter or click to select the suggestion.</li>
+                          <li>Go up or down with arrow keys or scroll</li>
+                          <li>Press enter or click to select the suggestion</li>
                         </ul>
                       </li>
                       <li>
                         Press enter to confirm what you have typed, and don't want a kanji
-                        suggestion for that portion of text.
+                        suggestion for that portion of text
                       </li>
-                      <li>Press shift + space to convert the unconfirmed text to katakana.</li>
                       <li>
                         Backspaces are smart. It tries to unconfirm anything you did, else it will
-                        remove the last character like normal.
+                        remove the last character like normal
                       </li>
                     </ul>
                   </div>
