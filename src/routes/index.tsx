@@ -125,7 +125,7 @@ export default function Home() {
                   <div class="space-y-4 py-2">
                     <p>
                       You can select the input field and start typing, shocker. But once you have
-                      typed something, QuickIME comes with a few shortcuts:
+                      typed something, QuickIME comes with a few handy features:
                     </p>
                     <ul class="list-disc space-y-4">
                       <li>
