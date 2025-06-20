@@ -12,6 +12,7 @@ export default createHandler(() => (
           <link rel="icon" href="icon.png" />
           <meta name="author" content="xlcdev" />
           <meta property="og:type" content="website" />
+          <meta name="theme-color" content="#a59dff" />
           <meta
             property="og:title"
             content="QuickIME – An Input Method Editor that doesn't suck"
