@@ -118,7 +118,8 @@ export default function Home() {
                   <DialogHeader>
                     <DialogTitle>Tutorial</DialogTitle>
                     <DialogDescription>
-                      This is a quick walkthrough of how to use QuickIME.
+                      This is a quick tutorial of how to use QuickIME. For now, only Japanese is
+                      supported.
                     </DialogDescription>
                   </DialogHeader>
                   <div class="space-y-4 py-2">
