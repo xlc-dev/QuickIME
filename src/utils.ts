@@ -2,7 +2,8 @@ import type { ClassValue } from "clsx";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { Accessor, Setter } from "solid-js";
-import { createSignal, createEffect, onMount, on } from "solid-js";
+import { createSignal, createEffect } from "solid-js";
+import { isServer } from "solid-js/web";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -14,24 +15,26 @@ export function getCSSVar(name: string) {
 }
 
 export function createStorageSignal<T>(key: string, defaultValue: T): [Accessor<T>, Setter<T>] {
-  const [value, setValue] = createSignal<T>(defaultValue);
+  const initial: T = isServer
+    ? defaultValue
+    : (() => {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw !== null ? (JSON.parse(raw) as T) : defaultValue;
+        } catch {
+          return defaultValue;
+        }
+      })();
 
-  onMount(() => {
-    const item = localStorage.getItem(key);
-    if (item != null) {
+  const [value, setValue] = createSignal<T>(initial);
+
+  if (!isServer) {
+    createEffect(() => {
       try {
-        setValue(JSON.parse(item));
-      } catch {
-        /* ignore malformed */
-      }
-    }
-  });
-
-  createEffect(
-    on(value, (v) => {
-      localStorage.setItem(key, JSON.stringify(v));
-    })
-  );
+        localStorage.setItem(key, JSON.stringify(value()));
+      } catch {}
+    });
+  }
 
   return [value, setValue];
 }
