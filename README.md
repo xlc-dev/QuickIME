@@ -9,6 +9,7 @@
 - Zero-server IME: Runs 100% in your browser. No tracking, no back-end. Only network call to proxy for Jisho to get kanji suggestions.
 - Instant Romanization -> Characters: Type phonetic input (e.g. romaji) and get immediate candidate suggestions.
 - Persistent UI Settings saved in localStorage
+- Keyboar Shortcuts
 - Light / Dark / System Theme
 
 ## 💻 Getting Started
