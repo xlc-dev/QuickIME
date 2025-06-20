@@ -20,9 +20,16 @@ import {
   DropdownMenuTrigger,
 } from "./ui/DropdownMenu";
 
-type JishoJapanese = { word?: string; reading: string };
-type JishoEntry = { japanese: JishoJapanese[] };
-type JishoResponse = { data: JishoEntry[] };
+type JishoJapanese = {
+  word?: string;
+  reading: string;
+};
+type JishoEntry = {
+  japanese: JishoJapanese[];
+};
+type JishoResponse = {
+  data: JishoEntry[];
+};
 
 type LastConversion = {
   confirmed: string;
@@ -47,7 +54,9 @@ async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
     const res = await fetch(proxyUrl);
 
     if (!res.ok) {
-      console.error(`Error fetching from CORS Anywhere proxy: ${res.status} ${res.statusText}`);
+      console.error(
+        `Error fetching from CORS Anywhere proxy: ${res.status} ` + `${res.statusText}`
+      );
       try {
         const errorText = await res.text();
         console.error("Proxy error response:", errorText);
@@ -146,7 +155,11 @@ export function IMEField() {
     setTimeout(() => ta?.focus(), 0);
   }
 
-  function handleKeyDown(e: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) {
+  function handleKeyDown(
+    e: KeyboardEvent & {
+      currentTarget: HTMLTextAreaElement;
+    }
+  ) {
     if (isMenuOpen()) {
       const len = suggestions().length;
       if (len > 0 && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
@@ -236,7 +249,11 @@ export function IMEField() {
     }
   }
 
-  function handleInput(e: InputEvent & { currentTarget: HTMLTextAreaElement }) {
+  function handleInput(
+    e: InputEvent & {
+      currentTarget: HTMLTextAreaElement;
+    }
+  ) {
     const val = e.currentTarget.value;
     setInput(val);
     setIsComposing(val.length > confirmedIndex());
@@ -255,12 +272,20 @@ export function IMEField() {
     }
   }
 
-  function handleCompositionStart(e: CompositionEvent & { currentTarget: HTMLTextAreaElement }) {
+  function handleCompositionStart(
+    e: CompositionEvent & {
+      currentTarget: HTMLTextAreaElement;
+    }
+  ) {
     setIsComposing(true);
     setCompositionStart(e.currentTarget.selectionStart);
   }
 
-  function handleCompositionEnd(e: CompositionEvent & { currentTarget: HTMLTextAreaElement }) {
+  function handleCompositionEnd(
+    e: CompositionEvent & {
+      currentTarget: HTMLTextAreaElement;
+    }
+  ) {
     setIsComposing(false);
     const start = compositionStart();
     const pos = e.currentTarget.selectionStart;
