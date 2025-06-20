@@ -39,16 +39,34 @@ const JISHO_PROXY_BASE = import.meta.env.PROD
 async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
   if (!reading) return [];
   const jishoUrl = "https://jisho.org/api/v1/search/words?keyword=" + encodeURIComponent(reading);
-  const proxyUrl = JISHO_PROXY_BASE + encodeURIComponent(jishoUrl);
+
+  const proxyUrl = import.meta.env.PROD
+    ? JISHO_PROXY_BASE + jishoUrl
+    : JISHO_PROXY_BASE + "?url=" + encodeURIComponent(jishoUrl);
 
   try {
-    const res = await fetch(proxyUrl);
-    if (!res.ok) return [];
+    const res = await fetch(proxyUrl, {
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+      },
+    });
+
+    if (!res.ok) {
+      console.error(`Error fetching from proxy: ${res.status} ${res.statusText}`);
+      try {
+        const errorText = await res.text();
+        console.error("Proxy error response:", errorText);
+      } catch (e) {
+        console.error("Could not read error response text:", e);
+      }
+      return [];
+    }
     const json = (await res.json()) as JishoResponse;
     if (!json?.data) return [];
     const set = new Set(json.data.map((e) => e.japanese[0].word || e.japanese[0].reading));
     return Array.from(set);
-  } catch {
+  } catch (error) {
+    console.error("Error in fetchKanjiFromJisho:", error);
     return [];
   }
 }
