@@ -11,6 +11,8 @@
 - Persistent UI Settings saved in localStorage
 - Keyboar Shortcuts
 - Light / Dark / System Theme
+- PWA Support
+- Mobile Support
 
 ## 💻 Getting Started
 
