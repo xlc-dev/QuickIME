@@ -117,35 +117,68 @@ export default function Home() {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Tutorial</DialogTitle>
+                    <DialogTitle>How to Use QuickIME</DialogTitle>
                     <DialogDescription>
-                      This is a quick tutorial of how to use QuickIME. For now, only Japanese is
-                      supported.
+                      Here's a quick guide to get you started with QuickIME. For now, only Japanese
+                      is supported.
                     </DialogDescription>
                   </DialogHeader>
-                  <div class="space-y-4 py-2">
-                    <p>
-                      You can select the input field and start typing, shocker. But once you have
-                      typed something, QuickIME comes with a few handy features:
-                    </p>
-                    <ul class="list-disc space-y-4">
-                      <li>
-                        Press space to call jisho.org to get kanji/kana suggestions. in which you
-                        can:
-                        <ul class="list-inside list-disc">
-                          <li>Go up or down with arrow keys or scroll</li>
-                          <li>Press enter or click to select the suggestion</li>
-                        </ul>
-                      </li>
-                      <li>
-                        Press enter to confirm what you have typed, and don't want a kanji
-                        suggestion for that portion of text
-                      </li>
-                      <li>
-                        Backspaces are smart. It tries to unconfirm anything you did, else it will
-                        remove the last character like normal
-                      </li>
-                    </ul>
+                  <div class="space-y-6 py-2 text-sm">
+                    <div class="space-y-2">
+                      <h3 class="font-semibold">1. Basic Typing</h3>
+                      <p class="text-muted-foreground">
+                        Just start typing in romaji. It will automatically be converted to hiragana
+                        as you type.
+                      </p>
+                    </div>
+
+                    <div class="space-y-2">
+                      <h3 class="font-semibold">2. Converting to Kanji</h3>
+                      <p class="text-muted-foreground">Once you have hiragana ready to convert:</p>
+                      <ul class="text-muted-foreground list-inside list-disc space-y-2 pl-2">
+                        <li>
+                          <strong>On a Computer:</strong> Press the{" "}
+                          <kbd class="bg-muted rounded-md border px-1.5 py-0.5 font-sans">
+                            Spacebar
+                          </kbd>
+                          .
+                        </li>
+                        <li>
+                          <strong>On Mobile:</strong> Tap the{" "}
+                          <span class="border-primary/50 bg-primary/10 text-primary rounded-md border px-1.5 py-0.5 font-sans">
+                            Convert
+                          </span>{" "}
+                          button.
+                        </li>
+                      </ul>
+                      <p class="text-muted-foreground">
+                        A list of suggestions will appear. Use your <strong>Arrow Keys</strong> or{" "}
+                        <strong>scroll/tap</strong> to choose one, then press{" "}
+                        <kbd class="bg-muted rounded-md border px-1.5 py-0.5 font-sans">Enter</kbd>{" "}
+                        or <strong>click/tap</strong> to select it.
+                      </p>
+                    </div>
+
+                    <div class="space-y-2">
+                      <h3 class="font-semibold">3. Pro Tips</h3>
+                      <ul class="text-muted-foreground list-inside list-disc space-y-2 pl-2">
+                        <li>
+                          <strong>Confirming Hiragana:</strong> Don't want to convert? Just press{" "}
+                          <kbd class="bg-muted rounded-md border px-1.5 py-0.5 font-sans">
+                            Enter
+                          </kbd>{" "}
+                          to confirm the text as-is.
+                        </li>
+                        <li>
+                          <strong>Smart Backspace:</strong> The{" "}
+                          <kbd class="bg-muted rounded-md border px-1.5 py-0.5 font-sans">
+                            Backspace
+                          </kbd>{" "}
+                          key will undo your last conversion (e.g., changing 漢字 back to かんじ)
+                          before it deletes characters.
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </DialogContent>
               </Dialog>
