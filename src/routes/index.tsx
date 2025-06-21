@@ -18,6 +18,7 @@ import { IMEField } from "~/components/IMEField";
 
 const Info = clientOnly(() => import("../components/Info"));
 import { createStorageSignal } from "~/utils";
+import { Grid } from "~/components/ui/Grid";
 
 export default function Home() {
   const [showTitle, setShowTitle] = createStorageSignal("setting-show-title", true);
@@ -37,7 +38,7 @@ export default function Home() {
         justifyContent="start"
         alignItems="center"
         class="bg-background text-foreground pt-4 lg:pt-[20vh]">
-        <div class="flex w-full max-w-2xl flex-col items-center gap-4 px-4">
+        <Flex flexDirection="col" alignItems="center" class="w-full max-w-2xl gap-4 px-4">
           <div class="text-center">
             <Info showTitle={showTitle} showExplanation={showExplanation} />
           </div>
@@ -75,7 +76,7 @@ export default function Home() {
                       Customize your experience. Changes are saved automatically.
                     </DialogDescription>
                   </DialogHeader>
-                  <div class="grid gap-4 py-4">
+                  <Grid class="gap-4 py-4">
                     <Switch
                       checked={showTitle()}
                       onChange={setShowTitle}
@@ -102,7 +103,7 @@ export default function Home() {
                       <Label>Theme</Label>
                       <ThemeToggle />
                     </Flex>
-                  </div>
+                  </Grid>
                 </DialogContent>
               </Dialog>
 
@@ -150,7 +151,7 @@ export default function Home() {
               </Dialog>
             </Flex>
           </footer>
-        </div>
+        </Flex>
       </Flex>
     </>
   );

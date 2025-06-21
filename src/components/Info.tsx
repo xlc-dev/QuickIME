@@ -1,4 +1,5 @@
 import { Show } from "solid-js";
+import { Flex } from "./ui/Flex";
 
 export default function Info(props: {
   showTitle: CallableFunction;
@@ -7,12 +8,12 @@ export default function Info(props: {
   return (
     <>
       <Show when={props.showTitle()}>
-        <h1 class="flex flex-col items-center text-3xl font-semibold sm:text-4xl">
+        <Flex flexDirection="col" alignItems="center">
           <img src="icon.png" alt="" class="mb-2 h-10 w-10 lg:h-16 lg:w-16" />
-          <p>
+          <h1 class="text-3xl font-bold">
             QuickIME – An Input Method Editor that <span class="text-primary">doesn't suck</span>
-          </p>
-        </h1>
+          </h1>
+        </Flex>
       </Show>
 
       <Show when={props.showExplanation()}>
