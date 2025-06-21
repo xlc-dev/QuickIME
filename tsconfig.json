@@ -17,6 +17,6 @@
     "isolatedModules": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "app.config.ts", "eslint.config.js", "public/sw.js"],
+  "include": ["src/**/*", "app.config.ts", "eslint.config.js"],
   "exclude": ["node_modules", ".output", ".vinxi"]
 }
