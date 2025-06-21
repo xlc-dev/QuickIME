@@ -316,7 +316,7 @@ export function IMEField() {
               </div>
               <div
                 aria-hidden="true"
-                class="pointer-events-none absolute inset-0 px-3 py-2 text-base whitespace-pre-wrap select-none">
+                class="pointer-events-none absolute inset-0 min-h-[42px] w-full px-3 py-2 text-base whitespace-pre-wrap select-none">
                 <span>{confirmedText()}</span>
                 <span class="border-b border-dotted border-current">{unconfirmedText()}</span>
               </div>
@@ -329,7 +329,7 @@ export function IMEField() {
                 onKeyDown={handleKeyDown}
                 onCompositionStart={handleCompositionStart}
                 onCompositionEnd={handleCompositionEnd}
-                class="caret-foreground bg-transparent text-transparent"
+                class="caret-foreground min-h-[42px] w-full bg-transparent px-3 py-2 text-base whitespace-pre-wrap text-transparent"
                 autocorrect="off"
                 autocapitalize="off"
                 spellcheck={false}
