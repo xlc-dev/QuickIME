@@ -18,20 +18,9 @@ export default createHandler(() => (
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-title" content="QuickIME" />
-          <meta
-            name="apple-mobile-web-app-status-bar-style"
-            content="default"
-          />
-          <link
-            rel="apple-touch-icon"
-            sizes="192x192"
-            href="/icons/-192x192.png"
-          />
-          <link
-            rel="apple-touch-icon"
-            sizes="512x512"
-            href="/icons/-512x512.png"
-          />
+          <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+          <link rel="apple-touch-icon" sizes="192x192" href="/icons/-192x192.png" />
+          <link rel="apple-touch-icon" sizes="512x512" href="/icons/-512x512.png" />
           <meta
             property="og:title"
             content="QuickIME – An Input Method Editor that doesn't suck"
@@ -52,18 +41,9 @@ export default createHandler(() => (
             name="twitter:description"
             content="A local-first Input Method Editor (IME) for Japanese, aiming for a fast and frustration-free experience. Since all IME's on Linux/Windows/Android are annoying or slow."
           />
-          <meta
-            property="og:image"
-            content="https://xlc-dev.github.io/QuickIME/icon.png"
-          />
-          <meta
-            name="twitter:image"
-            content="https://xlc-dev.github.io/QuickIME/icon.png"
-          />
-          <meta
-            property="og:url"
-            content="https://xlc-dev.github.io/QuickIME/"
-          />
+          <meta property="og:image" content="https://xlc-dev.github.io/QuickIME/icon.png" />
+          <meta name="twitter:image" content="https://xlc-dev.github.io/QuickIME/icon.png" />
+          <meta property="og:url" content="https://xlc-dev.github.io/QuickIME/" />
 
           {assets}
         </head>

@@ -44,9 +44,10 @@ type LastConversion = {
   end: number;
 };
 
-const [jishoCache, setJishoCache] = createStorageSignal<
-  Record<string, string[]>
->("jisho-cache", {});
+const [jishoCache, setJishoCache] = createStorageSignal<Record<string, string[]>>(
+  "jisho-cache",
+  {}
+);
 
 async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
   if (!reading) return [];
@@ -57,9 +58,7 @@ async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
   }
 
   const JISHO_PROXY_BASE = "https://cors-anywhere.com/";
-  const jishoUrl =
-    "https://jisho.org/api/v1/search/words?keyword=" +
-    encodeURIComponent(reading);
+  const jishoUrl = "https://jisho.org/api/v1/search/words?keyword=" + encodeURIComponent(reading);
 
   const proxyUrl = JISHO_PROXY_BASE + jishoUrl;
   const hiragana = wanakana.toHiragana(reading);
@@ -68,17 +67,13 @@ async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
   try {
     const res = await fetch(proxyUrl);
     if (!res.ok) {
-      console.error(
-        `Error fetching from CORS proxy: ${res.status} ${res.statusText}`,
-      );
+      console.error(`Error fetching from CORS proxy: ${res.status} ${res.statusText}`);
       return [hiragana, katakana];
     }
     const json = (await res.json()) as JishoResponse;
     if (!json?.data) return [hiragana, katakana];
 
-    const unique = new Set(
-      json.data.map((e) => e.japanese[0].word || e.japanese[0].reading),
-    );
+    const unique = new Set(json.data.map((e) => e.japanese[0].word || e.japanese[0].reading));
     const results = [...new Set([hiragana, katakana, ...Array.from(unique)])];
 
     setJishoCache((prev) => ({ ...prev, [reading]: results }));
@@ -106,9 +101,7 @@ export function IMEField() {
   const [isMenuOpen, setIsMenuOpen] = createSignal(false);
   const [confirmedIndex, setConfirmedIndex] = createSignal(0);
   const [isComposing, setIsComposing] = createSignal(false);
-  const [conversionHistory, setConversionHistory] = createSignal<
-    LastConversion[]
-  >([]);
+  const [conversionHistory, setConversionHistory] = createSignal<LastConversion[]>([]);
   const [copied, setCopied] = createSignal(false);
 
   let ta: HTMLTextAreaElement | undefined;
@@ -166,10 +159,7 @@ export function IMEField() {
       ta.value = newVal;
       ta.setSelectionRange(newPos, newPos);
     }
-    setConversionHistory((prev) => [
-      ...prev,
-      { confirmed: cand, reading, start, end: newPos },
-    ]);
+    setConversionHistory((prev) => [...prev, { confirmed: cand, reading, start, end: newPos }]);
     setLookupReading(null);
     setSelectedIndex(0);
     setIsMenuOpen(false);
@@ -189,9 +179,7 @@ export function IMEField() {
     }
   }
 
-  function handleKeyDown(
-    e: KeyboardEvent & { currentTarget: HTMLTextAreaElement },
-  ) {
+  function handleKeyDown(e: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) {
     if (isMenuOpen()) {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -203,9 +191,7 @@ export function IMEField() {
       }
       if (e.key === "ArrowUp") {
         e.preventDefault();
-        setSelectedIndex(
-          (prev) => (prev - 1 + suggestions().length) % suggestions().length,
-        );
+        setSelectedIndex((prev) => (prev - 1 + suggestions().length) % suggestions().length);
       }
       return;
     }
@@ -268,16 +254,12 @@ export function IMEField() {
     setIsComposing(val.length > currentConfirmedIndex);
   }
 
-  function handleCompositionStart(
-    e: CompositionEvent & { currentTarget: HTMLTextAreaElement },
-  ) {
+  function handleCompositionStart(e: CompositionEvent & { currentTarget: HTMLTextAreaElement }) {
     setIsComposing(true);
     setCompositionStart(e.currentTarget.selectionStart);
   }
 
-  function handleCompositionEnd(
-    e: CompositionEvent & { currentTarget: HTMLTextAreaElement },
-  ) {
+  function handleCompositionEnd(e: CompositionEvent & { currentTarget: HTMLTextAreaElement }) {
     setIsComposing(false);
     const start = compositionStart();
     const pos = e.currentTarget.selectionStart;
@@ -302,22 +284,17 @@ export function IMEField() {
 
   return (
     <div class="relative w-full">
-      <DropdownMenu
-        open={isMenuOpen()}
-        onOpenChange={setIsMenuOpen}
-        placement="bottom-start"
-      >
+      <DropdownMenu open={isMenuOpen()} onOpenChange={setIsMenuOpen} placement="bottom-start">
         <DropdownMenuTrigger as="div" class="w-full outline-none" disabled>
           <TextField>
             <div class="relative w-full">
-              <div class="absolute right-2 top-2 z-20 flex items-center space-x-2">
+              <div class="absolute top-2 right-2 z-20 flex items-center space-x-2">
                 <Show when={unconfirmedText().length > 0 && !isMenuOpen()}>
                   <Button
                     onClick={handleConvert}
                     size="sm"
                     variant="default"
-                    class="block lg:hidden"
-                  >
+                    class="block lg:hidden">
                     Convert
                   </Button>
                 </Show>
@@ -330,8 +307,7 @@ export function IMEField() {
                           <CopyIcon class="h-4 w-4" />
                           <span>Copy</span>
                         </>
-                      }
-                    >
+                      }>
                       <CheckIcon class="h-4 w-4" />
                       <span>Copied!</span>
                     </Show>
@@ -340,12 +316,9 @@ export function IMEField() {
               </div>
               <div
                 aria-hidden="true"
-                class="pointer-events-none absolute inset-0 select-none whitespace-pre-wrap px-3 py-2 text-base"
-              >
+                class="pointer-events-none absolute inset-0 px-3 py-2 text-base whitespace-pre-wrap select-none">
                 <span>{confirmedText()}</span>
-                <span class="border-b border-dotted border-current">
-                  {unconfirmedText()}
-                </span>
+                <span class="border-b border-dotted border-current">{unconfirmedText()}</span>
               </div>
               <TextFieldTextArea
                 autoResize
@@ -368,17 +341,13 @@ export function IMEField() {
           onCloseAutoFocus={(e) => {
             e.preventDefault();
             ta?.focus();
-          }}
-        >
+          }}>
           <Suspense fallback={<Spinner />}>
             <Show
               when={suggestions()?.length > 0}
               fallback={
-                <div class="text-muted-foreground px-2 py-1.5 text-sm">
-                  No results found.
-                </div>
-              }
-            >
+                <div class="text-muted-foreground px-2 py-1.5 text-sm">No results found.</div>
+              }>
               <div ref={listRef} class="max-h-[13rem] overflow-y-auto">
                 <For each={suggestions()}>
                   {(s, idx) => (
@@ -387,8 +356,7 @@ export function IMEField() {
                       onSelect={() => commitSuggestion(idx())}
                       onFocus={() => setSelectedIndex(idx())}
                       data-highlighted={selectedIndex() === idx()}
-                      class="data-[highlighted=true]:bg-accent data-[highlighted=true]:text-accent-foreground scroll-m-1"
-                    >
+                      class="data-[highlighted=true]:bg-accent data-[highlighted=true]:text-accent-foreground scroll-m-1">
                       {s}
                     </DropdownMenuItem>
                   )}
