@@ -57,7 +57,7 @@ async function fetchKanjiFromJisho(reading: string): Promise<string[]> {
     return cache[reading];
   }
 
-  const JISHO_PROXY_BASE = "https://cors-anywhere.com/";
+  const JISHO_PROXY_BASE = "https://corsproxy.io/?url=https://example.com/api/";
   const jishoUrl = "https://jisho.org/api/v1/search/words?keyword=" + encodeURIComponent(reading);
 
   const proxyUrl = JISHO_PROXY_BASE + jishoUrl;
