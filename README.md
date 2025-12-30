@@ -4,7 +4,7 @@
   <p><strong>A fast, private, and simple web-based Input Method Editor that doesn’t suck.</strong></p>
 </div>
 
-## 🚀 Features
+## Features
 
 - Zero-server IME: Runs 100% in your browser. No tracking, no back-end. Only network call to proxy for Jisho to get kanji suggestions
 - Instant Romanization -> Characters: Type phonetic input (e.g. romaji) and get immediate candidate suggestions
@@ -13,7 +13,7 @@
 - Light / Dark / System Theme
 - Mobile Support
 
-## 💻 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -46,6 +46,6 @@ pnpm build
 pnpm preview
 ```
 
-## 📜 License
+## License
 
 GPL-3.0 © 2025 [xlc-dev](https://github.com/xlc-dev). See [LICENSE](https://github.com/xlc-dev/QuickIME/blob/main/LICENSE) for more information.
